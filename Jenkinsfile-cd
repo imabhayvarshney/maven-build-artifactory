@@ -1,0 +1,32 @@
+pipeline{
+    agent any
+
+    environment {
+        CI = true
+    }
+    
+    stages{
+        stage('Download from Artifactory') {
+          steps{
+            sh 'rm -f /var/jenkins_home/workspace/cd-artifactory-azvm/artifacts/restro-built.war'
+
+            rtDownload (
+              buildName: 'restro.war',
+              buildNumber: '1',
+              serverId: 'jfrog-artifactory',
+              spec: '''{
+                        "files": [
+                          {
+                            "pattern":"restro-mvn-local/restro.war",
+                            "target": "./restro-built.war"
+                          }
+                        ]
+              }'''
+              
+            )
+            
+            sh 'scp -o StrictHostKeychecking=no -i key.pem *.war azureuser@20.127.237.212:/home/azureuser/jenkins/'
+        }
+    }
+  }
+}

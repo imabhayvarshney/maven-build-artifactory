@@ -1,0 +1,37 @@
+pipeline{
+    agent any
+    tools{
+        maven 'MAVEN'
+    }
+
+    environment {
+        CI = true
+    }
+
+    stages{
+        stage ("maven build"){
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Upload to Artifactory') {
+          steps{
+            rtUpload (
+              buildName: 'restro.war',
+              buildNumber: '1',
+              serverId: 'jfrog-artifactory',
+              spec: '''{
+                        "files": [
+                          {
+                            "pattern": "./target/restro.war",
+                            "target": "restro-mvn-local/"
+                          }
+                        ]
+              }'''
+            )
+            
+        }
+    }
+  }
+}
